@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="MAIN" Id="{e7da9574-0e43-4c13-9782-1accd2df7091}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	tProzesszeit : TON;
+	
+	bNotHaltFrei         : BOOL;
+    bSchutzhaubeZu       : BOOL;
+    bPaletteEingang      : BOOL;
+    bPalettePositioniert : BOOL;
+    bHubUnten            : BOOL;
+    bHubOben             : BOOL;
+    bKollisionFrei       : BOOL;
+    bWerkerQuittierung   : BOOL;
+	
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// =====================================================
+// AUSGÄNGE ZU BEGINN JEDES SPS-ZYKLUS ZURÜCKSETZEN
+// =====================================================
+
+GVL_IO.DO_SignalGruen      := FALSE;
+GVL_IO.DO_AlarmRot         := FALSE;
+GVL_IO.DO_Foerderband      := FALSE;
+GVL_IO.DO_FoerderbandStopp := FALSE;
+GVL_IO.DO_HubwerkHoch      := FALSE;
+GVL_IO.DO_HubwerkRunter    := FALSE;
+GVL_IO.DO_ProzessFreigabe  := FALSE;
+GVL_IO.DO_Heizfreigabe     := FALSE;
+
+
+// VAR ... END_VAR
+// Die Reihenfolge ist damit 
+//→ Umschaltung Simulation/Hardware
+// → CASE-Struktur
+
+// lesen -->  Programm ausführen -->  E/A schreiben --> wieder von vorne
+// =====================================================
+// SCHRITTKETTE
+// =====================================================
+
+CASE GVL_IO.Schritt OF
+
+    0:// S0 - Anlage bereit und wartet auf Palette
+
+        GVL_IO.DO_SignalGruen := TRUE;
+
+        IF GVL_IO.DI_NotHaltFrei
+           AND GVL_IO.DI_SchutzhaubeZu
+           AND GVL_IO.DI_HubUnten
+           AND GVL_IO.DI_PaletteEingang THEN
+
+            GVL_IO.Schritt := 1;
+
+        END_IF
+
+
+    1: // S1 - Förderband transportiert Palette
+
+        GVL_IO.DO_Foerderband := TRUE;
+
+        IF NOT GVL_IO.DI_NotHaltFrei THEN
+
+            GVL_IO.Schritt := 8;
+
+        ELSIF GVL_IO.DI_PalettePositioniert THEN
+
+            GVL_IO.Schritt := 2;
+
+        END_IF
+
+
+    2: // S2 - Palette stoppen
+
+        GVL_IO.DO_FoerderbandStopp := TRUE;
+
+        // Im nächsten SPS-Zyklus zu Hubwerk hoch
+        GVL_IO.Schritt := 3;
+
+
+    3: // S3 - Hubwerk fährt nach oben
+
+        GVL_IO.DO_FoerderbandStopp := TRUE;
+        GVL_IO.DO_HubwerkHoch      := TRUE;
+
+        IF NOT GVL_IO.DI_NotHaltFrei
+           OR NOT GVL_IO.DI_KollisionFrei THEN
+
+            GVL_IO.Schritt := 8;
+
+        ELSIF GVL_IO.DI_HubOben THEN
+
+            GVL_IO.Schritt := 4;
+
+        END_IF
+
+
+    4: // S4 - Temperatur prüfen
+
+        GVL_IO.DO_FoerderbandStopp := TRUE;
+        GVL_IO.DO_Heizfreigabe     := TRUE;
+
+        IF GVL_IO.AI_MotorTemperatur > 100.0 THEN
+
+            GVL_IO.Schritt := 8;
+
+        ELSIF GVL_IO.AI_FolienTemperatur >= 165.0
+           AND GVL_IO.AI_FolienTemperatur <= 185.0 THEN
+
+            GVL_IO.Schritt := 5;
+
+        ELSE
+
+            GVL_IO.Schritt := 8;
+
+        END_IF
+
+
+    5: // S5 - Bearbeitung läuft fünf Sekunden
+
+        GVL_IO.DO_FoerderbandStopp := TRUE;
+        GVL_IO.DO_Heizfreigabe     := TRUE;
+        GVL_IO.DO_ProzessFreigabe  := TRUE;
+
+        tProzesszeit(
+            IN := TRUE,
+            PT := T#5S
+        );
+
+        IF GVL_IO.AI_FolienTemperatur < 165.0
+           OR GVL_IO.AI_FolienTemperatur > 185.0
+           OR GVL_IO.AI_MotorTemperatur > 100.0
+           OR NOT GVL_IO.DI_NotHaltFrei THEN
+
+            tProzesszeit(IN := FALSE);
+            GVL_IO.Schritt := 8;
+
+        ELSIF tProzesszeit.Q THEN
+
+            tProzesszeit(IN := FALSE);
+            GVL_IO.Schritt := 6;
+
+        END_IF
+
+
+    6: // S6 - Hubwerk fährt nach unten
+
+        GVL_IO.DO_FoerderbandStopp := TRUE;
+        GVL_IO.DO_HubwerkRunter    := TRUE;
+
+        IF NOT GVL_IO.DI_NotHaltFrei THEN
+
+            GVL_IO.Schritt := 8;
+
+        ELSIF GVL_IO.DI_HubUnten THEN
+
+            GVL_IO.Schritt := 7;
+
+        END_IF
+
+
+    7: // S7 - Palette verlässt Station
+
+        GVL_IO.DO_Foerderband := TRUE;
+
+        IF NOT GVL_IO.DI_PalettePositioniert THEN
+
+            GVL_IO.Schritt := 0;
+
+        END_IF
+
+
+    8: // S8 - Alarm setzen
+
+        GVL_IO.AlarmAktiv := TRUE;
+        GVL_IO.Schritt := 9;
+
+
+    9: // S9 - Warten auf Fehlerbeseitigung und Quittierung
+
+        GVL_IO.DO_AlarmRot := TRUE;
+
+        IF GVL_IO.DI_WerkerQuittierung
+           AND GVL_IO.DI_NotHaltFrei
+           AND GVL_IO.AI_FolienTemperatur >= 165.0
+           AND GVL_IO.AI_FolienTemperatur <= 185.0
+           AND GVL_IO.AI_MotorTemperatur <= 100.0 THEN
+
+            GVL_IO.AlarmAktiv := FALSE;
+            GVL_IO.Schritt := 0;
+
+        END_IF
+
+
+    ELSE // Unbekannter Schrittwert
+
+        GVL_IO.AlarmAktiv := TRUE;
+        GVL_IO.Schritt := 9;
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="215" Count="181" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

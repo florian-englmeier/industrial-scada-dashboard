@@ -1,0 +1,16 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9d4a6a58-bb45-4abc-86c9-df80b05862d3}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <Name>Untitled1</Name>
+    <ProgramVersion>3.1.4022.7</ProgramVersion>
+    <Application>{fe5e88dd-731d-46e5-b76c-9489f0c93ffe}</Application>
+    <TypeSystem>{5ea97daa-2631-4364-b30d-4d0b6bbb51c1}</TypeSystem>
+    <Implicit_Task_Info>{09411fab-29d4-498f-81a5-f6859222830a}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{ff9e4be9-b2ba-43b1-835b-c3f4f47f32c7}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{d3c4231e-14ab-4c53-97be-4af593cced45}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{f40d53ec-e67d-4160-a4bf-e1fad0cb1477}</LibraryReferences>
+  </PropertyGroup>
+</Project>

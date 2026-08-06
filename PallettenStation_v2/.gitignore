@@ -1,0 +1,11 @@
+
+# TwinCAT build artifacts
+_Boot/
+_Config/
+_CompileInfo/
+_Deployment/
+*.suo
+*.user
+*.tsproj_temp
+.vs/
+*.project.~u

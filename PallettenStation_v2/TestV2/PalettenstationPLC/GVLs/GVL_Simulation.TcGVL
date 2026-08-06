@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="GVL_Simulation" Id="{a919a59b-602c-4326-98a3-70f7437a0255}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	GVL_SIM_NotHaltFrei         : BOOL := TRUE;
+    GVL_SIM_SchutzhaubeZu       : BOOL := TRUE;
+    GVL_SIM_PaletteEingang      : BOOL := FALSE;
+    GVL_SIM_PalettePositioniert : BOOL := FALSE;
+    GVL_SIM_HubUnten            : BOOL := TRUE;
+    GVL_SIM_HubOben             : BOOL := FALSE;
+    GVL_SIM_KollisionFrei       : BOOL := TRUE;
+    GVL_SIM_WerkerQuittierung   : BOOL := FALSE;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

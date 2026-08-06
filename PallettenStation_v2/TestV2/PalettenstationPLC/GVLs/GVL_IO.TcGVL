@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="GVL_IO" Id="{8ad5c9b9-7d9d-4849-a76f-a42ebeb4e2b6}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+
+    // ==================================================
+    // DIGITALE EINGÄNGE
+    // ==================================================
+
+    DI_NotHaltFrei        AT %I* : BOOL;
+    DI_SchutzhaubeZu      AT %I* : BOOL;
+    DI_PaletteEingang     AT %I* : BOOL;
+    DI_PalettePositioniert AT %I* : BOOL;
+    DI_HubUnten           AT %I* : BOOL;
+    DI_HubOben            AT %I* : BOOL;
+    DI_KollisionFrei      AT %I* : BOOL;
+    DI_WerkerQuittierung  AT %I* : BOOL;
+
+
+    // ==================================================
+    // DIGITALE AUSGÄNGE
+    // ==================================================
+
+    DO_SignalGruen        AT %Q* : BOOL;
+    DO_AlarmRot           AT %Q* : BOOL;
+    DO_Foerderband        AT %Q* : BOOL;
+    DO_FoerderbandStopp   AT %Q* : BOOL;
+    DO_HubwerkHoch        AT %Q* : BOOL;
+    DO_HubwerkRunter      AT %Q* : BOOL;
+    DO_ProzessFreigabe    AT %Q* : BOOL;
+    DO_Heizfreigabe       AT %Q* : BOOL;
+
+
+    // ==================================================
+    // ANALOGE EINGÄNGE
+    // ==================================================
+
+    AI_FolienTemperatur   AT %I* : REAL;
+    AI_MotorTemperatur    AT %I* : REAL;
+
+	// ==================================================
+	// INTERNE PROGRAMMVARIABLEN
+	// ==================================================
+	
+	Schritt : INT := 0;
+	AlarmAktiv : BOOL := FALSE;
+
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
