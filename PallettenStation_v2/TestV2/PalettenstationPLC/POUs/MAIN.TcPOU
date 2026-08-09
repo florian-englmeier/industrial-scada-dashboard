@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
   <POU Name="MAIN" Id="{e7da9574-0e43-4c13-9782-1accd2df7091}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	tProzesszeit : TON;
-	
+
 	bNotHaltFrei         : BOOL;
     bSchutzhaubeZu       : BOOL;
     bPaletteEingang      : BOOL;
@@ -13,7 +13,7 @@ VAR
     bHubOben             : BOOL;
     bKollisionFrei       : BOOL;
     bWerkerQuittierung   : BOOL;
-	
+
 END_VAR
 
 
@@ -33,10 +33,35 @@ GVL_IO.DO_ProzessFreigabe  := FALSE;
 GVL_IO.DO_Heizfreigabe     := FALSE;
 
 
-// VAR ... END_VAR
-// Die Reihenfolge ist damit 
-//→ Umschaltung Simulation/Hardware
-// → CASE-Struktur
+// =====================================================
+// UMSCHALTUNG SIMULATION / HARDWARE
+// =====================================================
+// GVL_IO.SIM_Aktiv = TRUE  -> Werte aus GVL_Simulation
+// GVL_IO.SIM_Aktiv = FALSE -> Werte von den echten %I*-Eingaengen (Default)
+
+IF GVL_IO.SIM_Aktiv THEN
+
+    bNotHaltFrei         := GVL_Simulation.GVL_SIM_NotHaltFrei;
+    bSchutzhaubeZu       := GVL_Simulation.GVL_SIM_SchutzhaubeZu;
+    bPaletteEingang      := GVL_Simulation.GVL_SIM_PaletteEingang;
+    bPalettePositioniert := GVL_Simulation.GVL_SIM_PalettePositioniert;
+    bHubUnten            := GVL_Simulation.GVL_SIM_HubUnten;
+    bHubOben             := GVL_Simulation.GVL_SIM_HubOben;
+    bKollisionFrei       := GVL_Simulation.GVL_SIM_KollisionFrei;
+    bWerkerQuittierung   := GVL_Simulation.GVL_SIM_WerkerQuittierung;
+
+ELSE
+
+    bNotHaltFrei         := GVL_IO.DI_NotHaltFrei;
+    bSchutzhaubeZu       := GVL_IO.DI_SchutzhaubeZu;
+    bPaletteEingang      := GVL_IO.DI_PaletteEingang;
+    bPalettePositioniert := GVL_IO.DI_PalettePositioniert;
+    bHubUnten            := GVL_IO.DI_HubUnten;
+    bHubOben             := GVL_IO.DI_HubOben;
+    bKollisionFrei       := GVL_IO.DI_KollisionFrei;
+    bWerkerQuittierung   := GVL_IO.DI_WerkerQuittierung;
+
+END_IF
 
 // lesen -->  Programm ausführen -->  E/A schreiben --> wieder von vorne
 // =====================================================
@@ -49,10 +74,10 @@ CASE GVL_IO.Schritt OF
 
         GVL_IO.DO_SignalGruen := TRUE;
 
-        IF GVL_IO.DI_NotHaltFrei
-           AND GVL_IO.DI_SchutzhaubeZu
-           AND GVL_IO.DI_HubUnten
-           AND GVL_IO.DI_PaletteEingang THEN
+        IF bNotHaltFrei
+           AND bSchutzhaubeZu
+           AND bHubUnten
+           AND bPaletteEingang THEN
 
             GVL_IO.Schritt := 1;
 
@@ -63,11 +88,11 @@ CASE GVL_IO.Schritt OF
 
         GVL_IO.DO_Foerderband := TRUE;
 
-        IF NOT GVL_IO.DI_NotHaltFrei THEN
+        IF NOT bNotHaltFrei THEN
 
             GVL_IO.Schritt := 8;
 
-        ELSIF GVL_IO.DI_PalettePositioniert THEN
+        ELSIF bPalettePositioniert THEN
 
             GVL_IO.Schritt := 2;
 
@@ -87,12 +112,12 @@ CASE GVL_IO.Schritt OF
         GVL_IO.DO_FoerderbandStopp := TRUE;
         GVL_IO.DO_HubwerkHoch      := TRUE;
 
-        IF NOT GVL_IO.DI_NotHaltFrei
-           OR NOT GVL_IO.DI_KollisionFrei THEN
+        IF NOT bNotHaltFrei
+           OR NOT bKollisionFrei THEN
 
             GVL_IO.Schritt := 8;
 
-        ELSIF GVL_IO.DI_HubOben THEN
+        ELSIF bHubOben THEN
 
             GVL_IO.Schritt := 4;
 
@@ -134,7 +159,7 @@ CASE GVL_IO.Schritt OF
         IF GVL_IO.AI_FolienTemperatur < 165.0
            OR GVL_IO.AI_FolienTemperatur > 185.0
            OR GVL_IO.AI_MotorTemperatur > 100.0
-           OR NOT GVL_IO.DI_NotHaltFrei THEN
+           OR NOT bNotHaltFrei THEN
 
             tProzesszeit(IN := FALSE);
             GVL_IO.Schritt := 8;
@@ -152,11 +177,11 @@ CASE GVL_IO.Schritt OF
         GVL_IO.DO_FoerderbandStopp := TRUE;
         GVL_IO.DO_HubwerkRunter    := TRUE;
 
-        IF NOT GVL_IO.DI_NotHaltFrei THEN
+        IF NOT bNotHaltFrei THEN
 
             GVL_IO.Schritt := 8;
 
-        ELSIF GVL_IO.DI_HubUnten THEN
+        ELSIF bHubUnten THEN
 
             GVL_IO.Schritt := 7;
 
@@ -167,7 +192,7 @@ CASE GVL_IO.Schritt OF
 
         GVL_IO.DO_Foerderband := TRUE;
 
-        IF NOT GVL_IO.DI_PalettePositioniert THEN
+        IF NOT bPalettePositioniert THEN
 
             GVL_IO.Schritt := 0;
 
@@ -184,8 +209,8 @@ CASE GVL_IO.Schritt OF
 
         GVL_IO.DO_AlarmRot := TRUE;
 
-        IF GVL_IO.DI_WerkerQuittierung
-           AND GVL_IO.DI_NotHaltFrei
+        IF bWerkerQuittierung
+           AND bNotHaltFrei
            AND GVL_IO.AI_FolienTemperatur >= 165.0
            AND GVL_IO.AI_FolienTemperatur <= 185.0
            AND GVL_IO.AI_MotorTemperatur <= 100.0 THEN

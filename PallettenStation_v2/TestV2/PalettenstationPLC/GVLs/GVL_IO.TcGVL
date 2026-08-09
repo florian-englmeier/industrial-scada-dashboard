@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
   <GVL Name="GVL_IO" Id="{8ad5c9b9-7d9d-4849-a76f-a42ebeb4e2b6}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
@@ -42,9 +42,13 @@ VAR_GLOBAL
 	// ==================================================
 	// INTERNE PROGRAMMVARIABLEN
 	// ==================================================
-	
+
 	Schritt : INT := 0;
 	AlarmAktiv : BOOL := FALSE;
+
+	// SIM_Aktiv = TRUE  -> Schrittkette nutzt GVL_Simulation-Werte
+	// SIM_Aktiv = FALSE -> Schrittkette nutzt echte DI_*-Hardwareeingaenge (Default)
+	SIM_Aktiv : BOOL := FALSE;
 
 
 END_VAR]]></Declaration>
