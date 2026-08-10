@@ -382,4 +382,5 @@ Port_*.cid
 Port_*.crc
 Port_*.occ
 Port_*.tizip
-Port_*_boot.tizip
+Port_*_boot.tizipSESSION_HANDOFF.md
+SESSION_HANDOFF.md

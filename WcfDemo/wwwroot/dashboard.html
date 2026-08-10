@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PalettenStation — SOAP Live-Dashboard</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --card:#141d29;
+    --card-border:#223047;
+    --text:#dbe4ee;
+    --text-dim:#8ea0b5;
+    --accent:#38d9c9;
+    --accent2:#5b8cff;
+    --green:#3ddc84;
+    --yellow:#f2c94c;
+    --red:#ff6b6b;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 800px at 80% -10%, #16233a 0%, var(--bg) 60%);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:32px 24px 20px;
+    max-width:1000px;
+    margin:0 auto;
+  }
+  .eyebrow{
+    color:var(--accent);
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{font-size:26px; margin:0 0 6px;}
+  .subtitle{color:var(--text-dim); font-size:14.5px;}
+
+  .controls{
+    max-width:1000px;
+    margin:0 auto;
+    padding:0 24px 24px;
+    display:flex;
+    gap:14px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .status-pill{
+    font-family:var(--mono);
+    font-size:12.5px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    padding:8px 14px;
+    border-radius:999px;
+  }
+  .status-dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--text-dim);
+    flex-shrink:0;
+  }
+  .status-dot.live{background:var(--green); box-shadow:0 0 0 4px rgba(61,220,132,0.18); animation:pulse 1.6s ease-in-out infinite;}
+  .status-dot.error{background:var(--red); box-shadow:0 0 0 4px rgba(255,107,107,0.18);}
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:.35;}
+  }
+  button{
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    color:var(--text);
+    padding:9px 16px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  button:hover{border-color:var(--accent);}
+  button.active{background:rgba(56,217,201,0.15); border-color:var(--accent); color:var(--accent);}
+  select{
+    font-family:var(--mono);
+    font-size:13px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    color:var(--text);
+    padding:8px 12px;
+    border-radius:10px;
+  }
+
+  main{max-width:1000px; margin:0 auto; padding:0 24px 80px;}
+
+  .error-banner{
+    display:none;
+    background:rgba(255,107,107,0.1);
+    border:1px solid rgba(255,107,107,0.4);
+    color:#ffb3b3;
+    border-radius:12px;
+    padding:16px 18px;
+    font-size:13.5px;
+    margin-bottom:24px;
+    line-height:1.6;
+  }
+  .error-banner code{background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:5px;}
+
+  .grid-top{
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap:18px;
+    margin-bottom:18px;
+  }
+  @media (max-width:780px){ .grid-top{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:22px;
+  }
+  .card h2{
+    margin:0 0 18px;
+    font-size:13.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--text-dim);
+    font-weight:600;
+  }
+
+  /* Step chain */
+  .steps{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .step{
+    flex:1 1 auto;
+    min-width:74px;
+    text-align:center;
+    padding:10px 6px 9px;
+    border-radius:9px;
+    border:1px solid var(--card-border);
+    color:var(--text-dim);
+    transition:all .25s ease;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .step .step-num{
+    font-family:var(--mono);
+    font-size:13px;
+    font-weight:600;
+  }
+  .step .step-desc{
+    font-size:10.5px;
+    line-height:1.25;
+    color:var(--text-dim);
+    opacity:.85;
+  }
+  .step.error-branch{border-style:dashed;}
+  .step.current{
+    background:var(--accent);
+    color:#04211e;
+    font-weight:700;
+    border-color:var(--accent);
+    transform:translateY(-3px);
+    box-shadow:0 6px 18px rgba(56,217,201,0.35);
+  }
+  .step.current .step-desc{color:#04211e; opacity:1;}
+  .step.current.alarm{
+    background:var(--red);
+    border-color:var(--red);
+    color:#2a0808;
+    box-shadow:0 6px 18px rgba(255,107,107,0.35);
+  }
+  .step.current.alarm .step-desc{color:#2a0808;}
+  .step-label{margin-top:16px; font-size:14.5px;}
+  .step-label b{transition:color .3s;}
+
+  /* Alarm + timestamp row */
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:18px;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .alarm-badge{
+    font-family:var(--mono);
+    font-size:13px;
+    font-weight:700;
+    padding:8px 16px;
+    border-radius:999px;
+  }
+  .alarm-badge.ok{background:rgba(61,220,132,0.15); color:var(--green);}
+  .alarm-badge.alarm{background:rgba(255,107,107,0.18); color:var(--red);}
+  .timestamp{font-family:var(--mono); font-size:13px; color:var(--text-dim);}
+
+  /* Gauges */
+  .gauges{display:flex; flex-direction:column; gap:18px;}
+  .gauge-item .gauge-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .gauge-item .gauge-label{font-size:13.5px; color:var(--text-dim);}
+  .gauge-item .gauge-value{
+    font-family:var(--mono);
+    font-size:22px;
+    font-weight:700;
+    transition:color .3s;
+  }
+  .gauge-item .gauge-trend{font-size:13px; margin-left:6px;}
+  .gauge-track{
+    height:10px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.06);
+    overflow:hidden;
+  }
+  .gauge-fill{
+    height:100%;
+    border-radius:999px;
+    background:var(--accent2);
+    transition:width .5s ease, background .3s ease;
+    width:0%;
+  }
+  .gauge-fill.warn{background:var(--yellow);}
+  .gauge-fill.crit{background:var(--red);}
+  .gauge-range{font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-top:4px;}
+
+  .flash{animation:flash-bg .9s ease;}
+  @keyframes flash-bg{
+    0%{background:rgba(56,217,201,0.28);}
+    100%{background:transparent;}
+  }
+
+  /* Raw SOAP */
+  details.raw{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  details.raw summary{
+    padding:16px 22px;
+    cursor:pointer;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text-dim);
+    list-style:none;
+  }
+  details.raw summary::-webkit-details-marker{display:none;}
+  details.raw .raw-body{padding:0 22px 22px;}
+  .raw-block h4{margin:14px 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent2);}
+  pre{
+    background:#0a0f16;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:14px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:#c8f7ef;
+    overflow-x:auto;
+    white-space:pre-wrap;
+    word-break:break-word;
+    margin:0;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12px;
+    padding:30px 24px 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">WcfDemo · CoreWCF SOAP-Endpoint</div>
+  <h1>PalettenStation — Live-Dashboard über SOAP</h1>
+  <div class="subtitle">Ruft <code>GetStatus()</code> direkt beim laufenden CoreWCF-Service ab (BasicHttpBinding, kein REST) und aktualisiert automatisch bei jeder Änderung.</div>
+</header>
+
+<div class="controls">
+  <div class="status-pill">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">wird verbunden …</span>
+  </div>
+  <label style="font-family:var(--mono); font-size:12.5px; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+    Endpoint
+    <input id="endpointInput" type="text" value="http://localhost:5289/PalettenStationService.svc"
+      style="font-family:var(--mono); font-size:12.5px; background:var(--card); border:1px solid var(--card-border); color:var(--text); padding:7px 10px; border-radius:8px; width:300px;">
+  </label>
+  <select id="intervalSelect">
+    <option value="1000">alle 1s</option>
+    <option value="2000" selected>alle 2s</option>
+    <option value="5000">alle 5s</option>
+    <option value="0">manuell</option>
+  </select>
+  <button id="pauseBtn">Pause</button>
+  <button id="fetchNowBtn">Jetzt abrufen</button>
+</div>
+
+<main>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="grid-top">
+    <div class="card">
+      <h2>Schrittkette</h2>
+      <div class="steps" id="stepsRow"></div>
+      <div class="step-label">Aktuell: <b id="stepText">—</b></div>
+      <div class="status-row">
+        <span class="alarm-badge ok" id="alarmBadge">—</span>
+        <span class="timestamp" id="timestampText">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Analogwerte</h2>
+      <div class="gauges">
+        <div class="gauge-item" id="folienGauge">
+          <div class="gauge-head">
+            <span class="gauge-label">Folientemperatur</span>
+            <span><span class="gauge-value" id="folienValue">— °C</span><span class="gauge-trend" id="folienTrend"></span></span>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="folienFill"></div></div>
+          <div class="gauge-range">Sollbereich 165–185 °C</div>
+        </div>
+        <div class="gauge-item" id="motorGauge">
+          <div class="gauge-head">
+            <span class="gauge-label">Motortemperatur</span>
+            <span><span class="gauge-value" id="motorValue">— °C</span><span class="gauge-trend" id="motorTrend"></span></span>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="motorFill"></div></div>
+          <div class="gauge-range">Anzeige ohne dokumentierten Grenzwert</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="raw">
+    <summary>SOAP-Anfrage &amp; Antwort (roh)</summary>
+    <div class="raw-body">
+      <div class="raw-block">
+        <h4>Request</h4>
+        <pre id="rawRequest">—</pre>
+      </div>
+      <div class="raw-block">
+        <h4>Response</h4>
+        <pre id="rawResponse">—</pre>
+      </div>
+    </div>
+  </details>
+
+</main>
+
+<footer>
+  Ruft ausschließlich <code>GetStatus()</code> (read-only) ab. Erfordert CORS-Freigabe im WcfDemo-Service (siehe Program.cs) und dass die Seite nicht per Doppelklick (file://) sondern über einen lokalen Static-Server geöffnet wird.
+</footer>
+
+<script>
+const STEP_LABELS = {
+  0:"S0 – Bereit", 1:"S1 – Transport", 2:"S2 – Stopp", 3:"S3 – Hubwerk hoch",
+  4:"S4 – Temperatur prüfen", 5:"S5 – Bearbeitung läuft", 6:"S6 – Hubwerk runter",
+  7:"S7 – Palette verlässt Station", 8:"S8 – ALARM", 9:"S9 – Warten auf Quittierung"
+};
+// Kurzform fuer die Kacheln der Schrittkette selbst - bewusst kompakt (2 Zeilen
+// Platz), damit ein Bediener auf einen Blick sieht, WAS gerade passiert, ohne
+// die S-Nummern auswendig kennen zu muessen.
+const STEP_SHORT = {
+  0:"Bereit", 1:"Transport", 2:"Stopp", 3:"Heben",
+  4:"Temp.-Check", 5:"Bearbeitung", 6:"Senken",
+  7:"Entladen", 8:"ALARM", 9:"Warten"
+};
+const ERROR_BRANCH = new Set([8,9]);
+const SOAP_NS = "http://schemas.xmlsoap.org/soap/envelope/";
+const DC_NS = "http://schemas.datacontract.org/2004/07/WcfDemo";
+const SOAP_ACTION = "http://tempuri.org/IPalettenStationService/GetStatus";
+
+const REQUEST_XML =
+`<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="${SOAP_NS}">
+  <soap:Body>
+    <GetStatus xmlns="http://tempuri.org/"/>
+  </soap:Body>
+</soap:Envelope>`;
+
+let timer = null;
+let paused = false;
+let lastValues = {};
+
+const stepsRow = document.getElementById("stepsRow");
+for (let i=0;i<=9;i++){
+  const div = document.createElement("div");
+  div.className = "step" + (ERROR_BRANCH.has(i) ? " error-branch" : "");
+  div.id = "step-"+i;
+  div.innerHTML = `<span class="step-num">S${i}</span><span class="step-desc">${STEP_SHORT[i]}</span>`;
+  stepsRow.appendChild(div);
+}
+
+document.getElementById("rawRequest").textContent = REQUEST_XML;
+
+function setStatus(state, text){
+  const dot = document.getElementById("statusDot");
+  dot.className = "status-dot" + (state === "live" ? " live" : state === "error" ? " error" : "");
+  document.getElementById("statusText").textContent = text;
+}
+
+function showError(msg){
+  const b = document.getElementById("errorBanner");
+  b.style.display = "block";
+  b.innerHTML = msg;
+}
+function hideError(){
+  document.getElementById("errorBanner").style.display = "none";
+}
+
+function flash(el){
+  el.classList.remove("flash");
+  void el.offsetWidth; // reflow, damit die Animation neu startet
+  el.classList.add("flash");
+}
+
+function trendArrow(oldVal, newVal){
+  if (oldVal === undefined || oldVal === null || isNaN(oldVal)) return "";
+  if (newVal > oldVal) return "▲";
+  if (newVal < oldVal) return "▼";
+  return "";
+}
+
+function updateGauge(prefix, value, min, max, warnBelow, warnAbove){
+  const fill = document.getElementById(prefix+"Fill");
+  const valueEl = document.getElementById(prefix+"Value");
+  const trendEl = document.getElementById(prefix+"Trend");
+  const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  fill.style.width = pct + "%";
+  fill.classList.remove("warn","crit");
+  if (warnBelow !== undefined && (value < warnBelow || value > warnAbove)){
+    fill.classList.add("crit");
+  }
+
+  const old = lastValues[prefix];
+  const arrow = trendArrow(old, value);
+  trendEl.textContent = arrow;
+  trendEl.style.color = arrow === "▲" ? "var(--yellow)" : arrow === "▼" ? "var(--accent2)" : "";
+
+  const changed = old !== undefined && old !== value;
+  valueEl.textContent = value.toFixed(1) + " °C";
+  if (changed) flash(valueEl.closest(".gauge-item"));
+  lastValues[prefix] = value;
+}
+
+function getVal(xmlDoc, tag){
+  const el = xmlDoc.getElementsByTagNameNS(DC_NS, tag)[0];
+  return el ? el.textContent : null;
+}
+
+async function fetchStatus(){
+  const endpoint = document.getElementById("endpointInput").value.trim();
+  try{
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": SOAP_ACTION
+      },
+      body: REQUEST_XML
+    });
+
+    const text = await res.text();
+    document.getElementById("rawResponse").textContent = text;
+
+    if (!res.ok){
+      throw new Error("HTTP " + res.status + " — Service hat mit einem Fehler geantwortet (siehe Rohantwort unten).");
+    }
+
+    const xmlDoc = new DOMParser().parseFromString(text, "application/xml");
+    if (xmlDoc.getElementsByTagName("parsererror").length){
+      throw new Error("Antwort konnte nicht als XML geparst werden.");
+    }
+
+    const schritt = parseInt(getVal(xmlDoc, "Schritt"), 10);
+    const schrittText = getVal(xmlDoc, "SchrittText");
+    const folien = parseFloat(getVal(xmlDoc, "FolienTemperatur"));
+    const motor = parseFloat(getVal(xmlDoc, "MotorTemperatur"));
+    const alarm = getVal(xmlDoc, "AlarmAktiv") === "true";
+    const zeitstempel = getVal(xmlDoc, "Zeitstempel");
+
+    // Schrittkette
+    for (let i=0;i<=9;i++){
+      const el = document.getElementById("step-"+i);
+      el.classList.toggle("current", i === schritt);
+      el.classList.toggle("alarm", i === schritt && alarm);
+    }
+    const stepTextEl = document.getElementById("stepText");
+    if (stepTextEl.textContent !== (schrittText || STEP_LABELS[schritt] || ("S"+schritt))){
+      stepTextEl.textContent = schrittText || STEP_LABELS[schritt] || ("S"+schritt);
+      flash(stepTextEl);
+    }
+
+    // Alarm-Badge
+    const badge = document.getElementById("alarmBadge");
+    badge.className = "alarm-badge " + (alarm ? "alarm" : "ok");
+    badge.textContent = alarm ? "ALARM AKTIV" : "Kein Alarm";
+
+    // Zeitstempel
+    const tsEl = document.getElementById("timestampText");
+    if (tsEl.textContent !== zeitstempel){
+      tsEl.textContent = zeitstempel;
+      flash(tsEl);
+    }
+
+    // Gauges
+    updateGauge("folien", folien, 0, 220, 165, 185);
+    updateGauge("motor", motor, 0, 120);
+
+    hideError();
+    setStatus("live", "verbunden — " + new Date().toLocaleTimeString("de-DE"));
+  } catch(err){
+    setStatus("error", "Verbindung fehlgeschlagen");
+    showError(
+      "<b>Abruf fehlgeschlagen:</b> " + err.message + "<br><br>" +
+      "Mögliche Ursachen: der WcfDemo-Service läuft nicht (<code>dotnet run</code> im Projektordner), " +
+      "der Port stimmt nicht mit dem Endpoint-Feld oben überein, oder CORS ist im Service noch nicht aktiv " +
+      "(<code>builder.Services.AddCors(...)</code> + <code>app.UseCors()</code> in <code>Program.cs</code>, vor <code>UseServiceModel</code>)."
+    );
+  }
+}
+
+function scheduleNext(){
+  clearTimeout(timer);
+  const interval = parseInt(document.getElementById("intervalSelect").value, 10);
+  if (paused || interval === 0) return;
+  timer = setTimeout(async () => { await fetchStatus(); scheduleNext(); }, interval);
+}
+
+document.getElementById("fetchNowBtn").addEventListener("click", fetchStatus);
+document.getElementById("pauseBtn").addEventListener("click", (e) => {
+  paused = !paused;
+  e.target.textContent = paused ? "Weiter" : "Pause";
+  e.target.classList.toggle("active", paused);
+  if (!paused) scheduleNext();
+  else clearTimeout(timer);
+});
+document.getElementById("intervalSelect").addEventListener("change", () => { if(!paused) scheduleNext(); });
+
+fetchStatus().then(scheduleNext);
+</script>
+
+</body>
+</html>
