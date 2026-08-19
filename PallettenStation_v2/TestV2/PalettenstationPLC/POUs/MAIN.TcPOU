@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
   <POU Name="MAIN" Id="{e7da9574-0e43-4c13-9782-1accd2df7091}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
@@ -49,6 +49,11 @@ IF GVL_IO.SIM_Aktiv THEN
     bHubOben             := GVL_Simulation.GVL_SIM_HubOben;
     bKollisionFrei       := GVL_Simulation.GVL_SIM_KollisionFrei;
     bWerkerQuittierung   := GVL_Simulation.GVL_SIM_WerkerQuittierung;
+	
+    GVL_IO.AI_FolienTemperatur := GVL_Simulation.GVL_SIM_FolienTemperatur;
+	GVL_IO.AI_MotorTemperatur  := GVL_Simulation.GVL_SIM_MotorTemperatur;
+	
+	
 
 ELSE
 
@@ -229,8 +234,15 @@ CASE GVL_IO.Schritt OF
 END_CASE]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="215" Count="181" />
+      <LineId Id="215" Count="29" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="418" Count="0" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="415" Count="1" />
+      <LineId Id="245" Count="151" />
       <LineId Id="2" Count="0" />
+      <LineId Id="186" Count="23" />
+      <LineId Id="397" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

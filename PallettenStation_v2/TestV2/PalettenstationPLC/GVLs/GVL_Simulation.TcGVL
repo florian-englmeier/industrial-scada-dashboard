@@ -11,6 +11,9 @@ VAR_GLOBAL
     GVL_SIM_HubOben             : BOOL := FALSE;
     GVL_SIM_KollisionFrei       : BOOL := TRUE;
     GVL_SIM_WerkerQuittierung   : BOOL := FALSE;
+	GVL_SIM_FolienTemperatur  	: REAL := 175.0;
+	GVL_SIM_MotorTemperatur   	: REAL := 50.0;
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

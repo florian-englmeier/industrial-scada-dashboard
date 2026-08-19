@@ -245,6 +245,23 @@
   .tut-card p{margin:0; color:var(--text-dim); font-size:13.5px;}
   .tut-card a{font-size:13px; font-weight:600;}
 
+  .shots{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
+  .shot{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .shot img{
+    width:100%;
+    display:block;
+    border-bottom:1px solid var(--card-border);
+    background:var(--bg);
+  }
+  .shot .cap{padding:14px 16px;}
+  .shot .cap h3{margin:0 0 4px; font-size:14.5px;}
+  .shot .cap p{margin:0; color:var(--text-dim); font-size:13px;}
+
   footer{
     text-align:center;
     color:var(--text-dim);
@@ -274,6 +291,7 @@
     <a href="#architektur">Architektur</a>
     <a href="#historie">Versionshistorie</a>
     <a href="#praxis">Engineering-Praxis</a>
+    <a href="#screenshots">Screenshots</a>
     <a href="#tutorials">Dokumentation</a>
   </div>
 </nav>
@@ -404,8 +422,43 @@
     </div>
   </section>
 
+  <section id="screenshots">
+    <h2><span class="num">05</span> Screenshots</h2>
+    <div class="section-sub">Das Live-Dashboard in vier Prozessschritten — Werte kommen live über ADS direkt von der SPS, nicht aus einer Mock-Datei.</div>
+    <div class="shots">
+      <div class="shot">
+        <img src="screenshots/dashboard_s0.png" alt="Dashboard im Schritt S0 — Anlage bereit, wartet auf Palette" loading="lazy">
+        <div class="cap">
+          <h3>S0 — Bereit</h3>
+          <p>Anlage wartet auf Palette. ADS verbunden, Anlagenstatus OK.</p>
+        </div>
+      </div>
+      <div class="shot">
+        <img src="screenshots/dashboard_s0_live.png" alt="Dashboard im Schritt S0 mit Live-Temperaturwerten" loading="lazy">
+        <div class="cap">
+          <h3>S0 — Live-Werte</h3>
+          <p>Folien- und Motortemperatur live von der SPS, mit Grenzwert-Balken.</p>
+        </div>
+      </div>
+      <div class="shot">
+        <img src="screenshots/dashboard_s1_transport.png" alt="Dashboard im Schritt S1 — Förderband transportiert Palette" loading="lazy">
+        <div class="cap">
+          <h3>S1 — Transport</h3>
+          <p>Förderband aktiv, Schrittkette und Temperaturen aktualisieren live im 2-Sekunden-Takt.</p>
+        </div>
+      </div>
+      <div class="shot">
+        <img src="screenshots/dashboard_s3_hubhoch.png" alt="Dashboard im Schritt S3 — Hubwerk fährt nach oben" loading="lazy">
+        <div class="cap">
+          <h3>S3 — Hub hoch</h3>
+          <p>Hubwerk fährt, aktuelle Position in der Schrittkette farblich hervorgehoben.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="tutorials">
-    <h2><span class="num">05</span> Dokumentation</h2>
+    <h2><span class="num">06</span> Dokumentation</h2>
     <div class="section-sub">Jeder Entwicklungsschritt ist als eigenes Kapitel im Repository dokumentiert — Konzepte, Code-Analyse, und die Fallen, in die ich unterwegs gelaufen bin.</div>
     <div class="cards">
       <div class="tut-card">
