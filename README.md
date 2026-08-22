@@ -145,7 +145,9 @@ industrial-scada-dashboard/
 
 ├── Fundamentals/                         \# C\# fundamentals sandbox
 
-│   └── Program.cs                        \# OOP, inheritance, LINQ
+│   ├── Program.cs                        \# OOP, inheritance, LINQ
+
+│   └── TUTORIAL.md                       \# C\# learning journal (v0.1 – v0.9)
 
 ├── SensorAPI/                            \# ASP.NET Core Web API (REST)
 
@@ -181,8 +183,6 @@ industrial-scada-dashboard/
 
 │   └── PalettenStation/                  \# PLC program (GVL\_IO, MAIN, ...)
 
-├── TUTORIAL.md                           \# C\# learning journal (v0.1 – v0.9)
-
 ├── TUTORIAL\_v1.0\_TwinCAT\_Roadmap.md      \# Strategy, hardware, phases
 
 ├── TUTORIAL\_v1.2\_ADS\_Integration.md      \# Deep-dive: PLC ↔ .NET bridge
@@ -197,7 +197,7 @@ The project has four tutorials, each with a distinct purpose:
 
 | Document | For whom | Content |
 | :---- | :---- | :---- |
-| `TUTORIAL.md` | C\# learners | 15 chapters from Hello World through OOP, LINQ, async, ASP.NET, and JS dashboard |
+| `Fundamentals/TUTORIAL.md` | C\# learners | 15 chapters from Hello World through OOP, LINQ, async, ASP.NET, and JS dashboard |
 | `TUTORIAL_v1.0_TwinCAT_Roadmap.md` | PLC-side / project managers | Anlagenlogik, hardware, EL3681 planning, phase roadmap |
 | `TUTORIAL_v1.2_ADS_Integration.md` | Full-stack integrators | The bridge: symbolic addressing, PLC↔.NET type mapping, silent-bug traps |
 | `TUTORIAL_v1.3_CoreWCF_SOAP.md` | Enterprise/integration engineers | REST vs. SOAP, ServiceContract/DataContract, WSDL vs. OpenAPI, the ABC principle |
