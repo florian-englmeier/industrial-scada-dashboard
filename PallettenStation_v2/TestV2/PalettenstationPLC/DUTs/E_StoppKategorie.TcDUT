@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <DUT Name="E_StoppKategorie" Id="{145209eb-dac3-4df5-9d79-fb93fa2acc11}">
+    <Declaration><![CDATA[// =====================================================
+// E_StoppKategorie
+// =====================================================
+// Bildet die Stoppkategorien nach EN 60204-1 als Software-Modell ab
+// (siehe FB_NotHalt fuer den ausfuehrlichen Sicherheitshinweis).
+// KEINE zertifizierte Sicherheitsklassifizierung.
+// =====================================================
+TYPE E_StoppKategorie :
+(
+	Kategorie_0 := 0,	// Sofortiger, unkontrollierter Halt durch Wegnahme der Energie/Freigabe
+	Kategorie_1 := 1	// Kontrollierter Halt: Energie bleibt bis sicherer Zustand erhalten, danach Wegnahme
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

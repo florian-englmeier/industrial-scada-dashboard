@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="FB_NotHalt" Id="{04016940-3458-48ed-b732-9aee75c7654a}" SpecialFunc="None">
+    <Declaration><![CDATA[// =====================================================
+// FB_NotHalt - Software-Modell einer Not-Halt-Stoppkategorie
+// =====================================================
+// WICHTIGER HINWEIS (bitte nicht entfernen):
+// Dies ist KEINE zertifizierte Sicherheitsfunktion nach EN ISO 13849-1 / IEC 62061.
+// Der Baustein bildet nur das *Verhalten* der Stoppkategorien 0 und 1 nach
+// EN 60204-1 in gewoehnlicher SPS-Logik nach - zu Lern- und Demonstrationszwecken
+// in diesem Projekt (Standard-I/O, kein TwinCAT-Safety-System vorhanden).
+//
+// Fuer echte funktionale Sicherheit (Personenschutz) sind zwingend erforderlich:
+//   - zertifizierte Safety-Hardware (z.B. TwinCAT Safety, EL69xx-Klemmen)
+//   - zweikanalige/redundante Signalauswertung mit Querschlusserkennung
+//   - Performance-Level-Nachweis nach EN ISO 13849-1 (bzw. SIL nach IEC 62061)
+//   - ein durch die zustaendige Stelle abgenommenes Sicherheitskonzept
+//
+// Was dieser Baustein trotzdem zeigt:
+//   - der Unterschied zwischen Kategorie 0 (sofortige Wegnahme der Energie)
+//     und Kategorie 1 (kontrollierter Halt, dann Wegnahme) nach EN 60204-1
+//   - Verriegelung (Latching) des Not-Halt-Zustands bis zu einer bewussten,
+//     eigenstaendigen Wiederanlauf-Handlung (EN ISO 13850) - nicht identisch
+//     mit einer allgemeinen Alarm-Quittierung
+// =====================================================
+FUNCTION_BLOCK FB_NotHalt
+VAR_INPUT
+	bNotHalt_Roh		: BOOL;				// Rohsignal Not-Halt-Taster (TRUE = ausgeloest)
+	eKategorie			: E_StoppKategorie := E_StoppKategorie.Kategorie_0;
+	bBewegungAktiv		: BOOL;				// Zusatzinfo fuer Kat.1: eine sicher zu beendende Bewegung laeuft noch
+	bWiederanlaufTaste	: BOOL;				// separate, bewusste Wiederanlauf-Bestaetigung
+	tMaxNachlauf		: TIME := T#2S;		// Obergrenze fuer den kontrollierten Nachlauf bei Kat.1
+END_VAR
+VAR_OUTPUT
+	bFreigabeAntriebe	: BOOL;				// FALSE = alle Antriebe/Aktoren muessen sofort in den sicheren Zustand
+	bVerriegelt			: BOOL;				// TRUE = Anlage bleibt gesperrt bis bewusster Wiederanlauf
+	sZustand			: STRING(80);
+END_VAR
+VAR
+	tNachlauf			: TON;
+	bLatched			: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bNotHalt_Roh THEN
+	bLatched := TRUE;
+END_IF
+
+IF bLatched THEN
+
+	CASE eKategorie OF
+
+		E_StoppKategorie.Kategorie_0:
+			// Kat. 0: sofortige, unkontrollierte Wegnahme der Freigabe
+			bFreigabeAntriebe := FALSE;
+			tNachlauf(IN := FALSE);
+			sZustand := 'NOT-HALT Kat.0 - Antriebe sofort aus';
+
+		E_StoppKategorie.Kategorie_1:
+			// Kat. 1: Freigabe bleibt, bis der sichere Zustand erreicht ist,
+			// danach Wegnahme - begrenzt auf eine maximale Nachlaufzeit.
+			IF bBewegungAktiv THEN
+				tNachlauf(IN := TRUE, PT := tMaxNachlauf);
+				bFreigabeAntriebe := NOT tNachlauf.Q;
+				sZustand := 'NOT-HALT Kat.1 - kontrollierter Nachlauf';
+			ELSE
+				tNachlauf(IN := FALSE);
+				bFreigabeAntriebe := FALSE;
+				sZustand := 'NOT-HALT Kat.1 - sicherer Zustand erreicht, Antriebe aus';
+			END_IF
+
+	ELSE
+		// unbekannte Kategorie -> auf der sicheren Seite wie Kat. 0 behandeln
+		bFreigabeAntriebe := FALSE;
+		tNachlauf(IN := FALSE);
+		sZustand := 'NOT-HALT - unbekannte Kategorie, sofortiger Halt';
+
+	END_CASE
+
+	bVerriegelt := TRUE;
+
+	// Wiederanlauf erfordert eine EIGENSTAENDIGE, bewusste Aktion (EN ISO 13850) -
+	// nicht identisch mit einer allgemeinen Alarm-Quittierung, und nur moeglich,
+	// wenn die Rohausloesung selbst nicht mehr ansteht.
+	IF NOT bNotHalt_Roh AND bWiederanlaufTaste THEN
+		bLatched := FALSE;
+		bVerriegelt := FALSE;
+		tNachlauf(IN := FALSE);
+		sZustand := 'Wiederanlauf bestaetigt - Anlage frei';
+	END_IF
+
+ELSE
+	bFreigabeAntriebe := TRUE;
+	bVerriegelt := FALSE;
+	sZustand := 'Kein NOT-HALT aktiv';
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
