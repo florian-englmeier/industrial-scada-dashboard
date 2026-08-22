@@ -348,7 +348,7 @@ Für kommende Versionen:
 - [ ] **Symbol-Handle-Caching** — schnellere Reads durch vorab aufgelöste Handles
 - [ ] **ADS Notifications** — Push-Benachrichtigungen statt Polling (SPS meldet Änderungen aktiv)
 - [ ] **Dashboard-Integration** — Live-Werte in der bestehenden `index.html` anzeigen
-- [x] **WCF-Vergleich** — warum ADS in dieser Art ähnlich funktioniert wie ein WCF-Service (Vorbereitung auf WITRON-Stack) → **erledigt in v1.3**, siehe `TUTORIAL_v1.3_CoreWCF_SOAP.md`. Derselbe `AdsService` wurde dabei unverändert von SensorAPI (REST) auf `WcfDemo` (SOAP/CoreWCF) übertragen — die ADS-Anbindung selbst ist völlig unabhängig davon, ob die Werte per REST oder SOAP nach außen gegeben werden.
+- [x] **WCF-Vergleich** — warum ADS in dieser Art ähnlich funktioniert wie ein WCF-Service (relevant für jeden Stack, der im Enterprise-/Intralogistik-Umfeld noch WCF/SOAP einsetzt) → **erledigt in v1.3**, siehe `TUTORIAL_v1.3_CoreWCF_SOAP.md`. Derselbe `AdsService` wurde dabei unverändert von SensorAPI (REST) auf `WcfDemo` (SOAP/CoreWCF) übertragen — die ADS-Anbindung selbst ist völlig unabhängig davon, ob die Werte per REST oder SOAP nach außen gegeben werden.
 
 ---
 

@@ -853,7 +853,7 @@ Dadurch bleibt jede Projektphase einzeln testbar und nachvollziehbar.
      
 5. **Dashboard-Erweiterung:** Chart.js-basierte Trendkurve für Spannung und Strom
 
-**Strategischer Wert:** Das ist der Punkt an dem das Projekt **wirklich** WITRON-Sprache spricht. Predictive Maintenance ist eines der zentralen Schlagworte der Intralogistik-Branche.
+**Strategischer Wert:** Das ist der Punkt an dem das Projekt **wirklich** die Sprache der Intralogistik-Branche spricht. Predictive Maintenance ist eines der zentralen Schlagworte dieser Branche.
 
 ---
 

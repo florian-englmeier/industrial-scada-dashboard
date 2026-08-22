@@ -1,4 +1,4 @@
-# C# Tutorial — WITRON Prep
+# C# Tutorial — Grundlagen
 
 > **Autor:** Flo Englmeier (bavarian-dataforge)  
 > **Stand:** v0.4.0 | Juni 2026  
@@ -9,7 +9,7 @@
 ## Inhaltsverzeichnis
 
 1. [Setup & Umgebung](#1-setup--umgebung)
-2. [v0.1 — Hello WITRON: Grundlagen](#2-v01--hello-witron-grundlagen)
+2. [v0.1 — Hello World: Grundlagen](#2-v01--hello-world-grundlagen)
 3. [v0.2 — List und foreach](#3-v02--list-und-foreach)
 4. [v0.3 — Vererbung, override, Alarm-System](#4-v03--vererbung-override-alarm-system)
 5. [v0.4 — Interface und LINQ](#5-v04--interface-und-linq)
@@ -43,14 +43,14 @@
 
 ---
 
-## 2. v0.1 — Hello WITRON: Grundlagen
+## 2. v0.1 — Hello World: Grundlagen
 
 ### Neues Projekt erstellen
 Visual Studio → Neues Projekt → Konsolenanwendung → C# → .NET 10.0
 
 ### Erstes Programm
 ```csharp
-Console.WriteLine("Hello, WITRON!");
+Console.WriteLine("Hello, World!");
 ```
 - `Console.WriteLine()` = Ausgabe auf der Konsole
 - Jede Anweisung endet mit `;` (Semikolon)
@@ -389,7 +389,7 @@ MAJOR  → Großer Umbau
 ### Bisherige Versionen
 | Version | Datum | Inhalt |
 |---------|-------|--------|
-| v0.1.0 | 01.06.2026 | Hello WITRON, erster Sensor |
+| v0.1.0 | 01.06.2026 | Hello World, erster Sensor |
 | v0.2.0 | 02.06.2026 | List + foreach |
 | v0.3.0 | 03.06.2026 | Vererbung, override, Alarm-System |
 | v0.4.0 | 04.06.2026 | Interface ISensor + LINQ |

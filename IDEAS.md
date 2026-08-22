@@ -36,7 +36,7 @@ Ein Werker soll aber nicht JSON lesen. Er soll auf einen Blick verstehen:
 - Wenn Alarm: welcher, wo, was tun?
 - Wo im Prozess sind wir gerade?
 
-Genau das ist die HMI-Aufgabe. Und genau da liegt der WITRON-Kern: **Software für tausende Werker, nicht für Ingenieure**.
+Genau das ist die HMI-Aufgabe. Und genau da liegt der Kern der Intralogistik-Branche: **Software für tausende Werker, nicht für Ingenieure**.
 
 ---
 
@@ -211,20 +211,13 @@ Zurück zu EL3681 und Predictive Maintenance. Bis dahin ist die HMI-Basis gelegt
 - Rate-Limiting: Endpoints vor Missbrauch schützen
 - CORS: für Anbindung von externen Frontends
 - Logging in Datei/Cloud: statt nur Console.WriteLine
-- Metrics und Monitoring: Prometheus + Grafana? (WITRON würde das lieben)
+- Metrics und Monitoring: Prometheus + Grafana? (in der Intralogistik-Branche üblich)
 
 ---
 
 ## Notizen für später
 
-**WCF-Vergleich einbauen** — irgendwo in den Tutorials erklären warum ADS strukturell wie ein WCF-Service funktioniert. Direkter Bezug zur WITRON-Anforderung im Job.
-
-**Cover-Story für Interview** — die drei besten Momente aus der Entwicklung zusammenschreiben:
-- Der "Parallels-Umweg" und die Erkenntnis dass Realtime-Treiber und Virtualisierung nicht zusammengehen
-- Die INT-vs-int Silent-Bug-Falle als Lernmoment
-- Der erste Live-JSON-Response aus der echten SPS
-
-**LinkedIn-Post nach v1.4.0** — wenn HMI-Track steht, ein kurzer Post: "Von simulierten Sensoren zu einer WITRON-Style HMI-Lösung in einem Monat". Öffentliche Sichtbarkeit hilft.
+**WCF-Vergleich einbauen** — irgendwo in den Tutorials erklären warum ADS strukturell wie ein WCF-Service funktioniert. Direkter Bezug zu Stellenanzeigen, die WCF/SOAP explizit fordern (in der Enterprise-/Intralogistik-Welt weit verbreitet).
 
 ---
 
